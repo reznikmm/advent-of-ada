@@ -1,0 +1,22 @@
+with "../config/advent_of_ada_config.gpr";
+project Advent_Of_Ada is
+
+   for Source_Dirs use ("../source/", "../config/");
+   for Object_Dir use "../.objs/" & Advent_Of_Ada_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "../bin";
+   for Main use ("day_01.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use Advent_Of_Ada_Config.Ada_Compiler_Switches;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); --  Symbolic traceback
+   end Binder;
+
+   package Install is
+      for Artifacts (".") use ("../share");
+   end Install;
+
+end Advent_Of_Ada;

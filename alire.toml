@@ -1,0 +1,11 @@
+name = "advent_of_ada"
+description = "Advent of Code solutions"
+version = "0.1.0-dev"
+
+authors = ["Max Reznik"]
+maintainers = ["Max Reznik <reznikmm@gmail.com>"]
+maintainers-logins = ["reznikmm"]
+
+project-files = ["gnat/advent_of_ada.gpr"]
+
+executables = ["advent_of_ada"]
