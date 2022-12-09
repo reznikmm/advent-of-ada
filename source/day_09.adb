@@ -1,86 +1,108 @@
-pragma Ada_2022;
-pragma Extensions_Allowed (On);
-
 with Ada.Text_IO;
-with Ada.Integer_Text_IO;
-with Ada.Containers.Hashed_Sets;
+with Ada.Containers.Formal_Hashed_Sets;
 
-procedure Day_09 is
-   type Position is array (1 .. 2) of Integer;
-   function Hash (V : Position) return Ada.Containers.Hash_Type is
-     (Ada.Containers.Hash_Type'Mod (V (1) + 123 * V (2)));
+procedure Day_09 with SPARK_Mode is
+   package Count_IO is new Ada.Text_IO.Integer_IO (Ada.Containers.Count_Type);
 
-   package Position_Sets is new Ada.Containers.Hashed_Sets
-     (Position, Hash, "=");
+   subtype Coordinate is Integer range -9_999 .. 9_999;
+   type Position is array (1 .. 2) of Coordinate;
+   type Step is array (1 .. 2) of Coordinate range -1 .. 1;
+   subtype Safe is Integer range Coordinate'First + 1 .. Coordinate'Last - 1;
 
-   type Direction is (Left, Right, Up, Down);
+   function "+" (Left : Position; Right : Step) return Position
+     with Pre => (for all C of Left => C in Safe);
 
-   function To_Direction (C : Character) return Direction is
-     (case C is
-         when 'L' => Left,
-         when 'R' => Right,
-         when 'U' => Up,
-         when 'D' => Down,
+   subtype Step_Encoding is Character
+     with Static_Predicate => Step_Encoding in 'L' | 'R' | 'U' | 'D';
+
+   function To_Step (Char : Character) return Step
+     with Pre => Char in Step_Encoding;
+
+   procedure Move_Tail
+     (Head : Position;
+      Tail : in out Position)
+     with Pre => (for all C of Tail => C in Safe);
+   --  Drag Tail after Head
+
+   function "+" (Left : Position; Right : Step) return Position is
+     (Left (1) + Right (1), Left (2) + Right (2));
+
+   function To_Step (Char : Character) return Step is
+     (case Char is
+         when 'L' => (-1, 0),
+         when 'R' => (1, 0),
+         when 'U' => (0, 1),
+         when 'D' => (0, -1),
          when others => raise Constraint_Error);
 
-   procedure Step (Head : in out Position; Dir : Direction) is
-   begin
-      case Dir is
-         when Left => Head (1) := Head (1) - 1;
-         when Right => Head (1) := Head (1) + 1;
-         when Up => Head (2) := Head (2) + 1;
-         when Down => Head (2) := Head (2) - 1;
-      end case;
-   end Step;
-
-   procedure Step
+   procedure Move_Tail
      (Head : Position;
       Tail : in out Position)
    is
       function Sign (Left : Integer) return Integer is
-        (if Left < 0 then -1 else 1);
+        (if Left < 0 then -1 elsif Left > 0 then 1 else 0);
+
+      Change : Step;
    begin
-      for J in 1 .. 2 loop
-         if Head (3 - J) = Tail (3 - J) and then
-           abs (Head (J) - Tail (J)) > 1
-         then
-            Tail (J) := Head (J) - Sign (Head (J) - Tail (J));
-            return;
-         end if;
-      end loop;
-
-      if (for all J in 1 .. 2 => Head (J) /= Tail (J)) and then
-        (for some J in 1 .. 2 => abs (Head (J) - Tail (J)) > 1)
-      then
-         for J in 1 .. 2 loop
-            Tail (J) := Tail (J) + Sign (Head (J) - Tail (J));
-         end loop;
+      if (for some J in 1 .. 2 => Head (J) - Tail (J) not in -1 .. 1) then
+         Change := (Sign (Head (1) - Tail (1)), Sign (Head (2) - Tail (2)));
+         Tail := Tail + Change;
       end if;
-   end Step;
+   end Move_Tail;
 
-   Visited : Position_Sets.Set;
+   function Hash (V : Position) return Ada.Containers.Hash_Type is
+      use type Ada.Containers.Hash_Type;
+   begin
+      return Ada.Containers.Hash_Type'Mod (V (1))
+        + 123 * Ada.Containers.Hash_Type'Mod (V (2));
+   end Hash;
 
-   Rope : array (1 .. 10) of Position := [others => [0, 0]];
+   package Position_Sets is new Ada.Containers.Formal_Hashed_Sets
+     (Position, Hash, "=");
+
+   Visited : Position_Sets.Set (Capacity => 5000, Modulus => 5003);
+
+   Rope : array (1 .. 10) of Position := (others => (0, 0));
 begin
    while not Ada.Text_IO.End_Of_File loop
       declare
-         Char : Character;
-         Count : Integer;
-         Dir   : Direction;
+         use type Ada.Containers.Count_Type;
+
+         Char  : Character;
+         Count : Ada.Containers.Count_Type;
       begin
          Ada.Text_IO.Get (Char);
-         Ada.Integer_Text_IO.Get (Count);
-         Dir := To_Direction (Char);
+         Count_IO.Get (Count);
+
+         if Char not in Step_Encoding or else
+           Count > Visited.Capacity - Position_Sets.Length (Visited)
+         then
+            Ada.Text_IO.Put_Line ("Invalid input");
+            return;
+         end if;
+
          for J in 1 .. Count loop
-            Step (Rope (1), Dir);
-            for K in 2 .. Rope'Last loop
-               Step (Rope (K - 1), Rope (K));
+            pragma Loop_Invariant
+              (Position_Sets.Length (Visited) <
+                   Visited.Capacity - Ada.Containers.Count_Type (Count - J));
+
+            if (for some Knot of Rope =>
+                 (for some Coordinate of Knot => Coordinate not in Safe))
+            then
+               Ada.Text_IO.Put_Line ("Out of bounds");
+               return;
+            end if;
+
+            Rope (1) := Rope (1) + To_Step (Char);
+
+            for Knot in 2 .. Rope'Last loop
+               Move_Tail (Head => Rope (Knot - 1), Tail => Rope (Knot));
             end loop;
-            Ada.Text_IO.Put_Line (Rope (Rope'Last)'Image);
-            Visited.Include (Rope (Rope'Last));
+
+            Position_Sets.Include (Visited, Rope (Rope'Last));
          end loop;
       end;
    end loop;
 
-   Ada.Integer_Text_IO.Put (Integer (Visited.Length));
+   Count_IO.Put (Position_Sets.Length (Visited));
 end Day_09;
