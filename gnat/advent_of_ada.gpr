@@ -7,7 +7,8 @@ project Advent_Of_Ada is
    for Exec_Dir use "../bin";
    for Main use
      ("day_01.adb", "day_02.adb", "day_03.adb", "day_04.adb", "day_05.adb",
-      "day_06.adb", "day_07.adb", "day_08.adb", "day_09.adb", "day_10.adb");
+      "day_06.adb", "day_07.adb", "day_08.adb", "day_09.adb", "day_10.adb",
+      "day_11.adb");
 
    package Compiler is
       for Default_Switches ("Ada") use
