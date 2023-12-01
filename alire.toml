@@ -9,5 +9,9 @@ maintainers-logins = ["reznikmm"]
 project-files = ["gnat/advent_of_ada.gpr"]
 
 executables = ["advent_of_ada"]
-[[depends-on]]
-gnatprove = "^12.1.1"
+#[[depends-on]]
+#gnatprove = "*"
+
+[build-switches]
+"*".ada_version = "Ada2022"
+

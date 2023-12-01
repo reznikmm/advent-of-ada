@@ -6,11 +6,12 @@ project Advent_Of_Ada is
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "../bin";
    for Main use
-     ("day_01.adb", "day_02.adb", "day_03.adb", "day_04.adb", "day_05.adb",
-      "day_06.adb", "day_07.adb", "day_08.adb", "day_09.adb", "day_10.adb",
-      "day_11.adb", "day_12.adb", "day_13.adb", "day_14.adb", "day_15.adb",
-      "day_16.adb", "day_17.adb", "day_18.adb", "day_19.adb", "day_20.adb",
-      "day_21.adb", "day_22.adb", "day_23.adb", "day_24.adb", "day_25.adb");
+     ("day_01.adb"--, "day_02.adb", "day_03.adb", "day_04.adb", "day_05.adb",
+      --  "day_06.adb", "day_07.adb", "day_08.adb", "day_09.adb", "day_10.adb",
+      --  "day_11.adb", "day_12.adb", "day_13.adb", "day_14.adb", "day_15.adb",
+      --  "day_16.adb", "day_17.adb", "day_18.adb", "day_19.adb", "day_20.adb",
+      --  "day_21.adb", "day_22.adb", "day_23.adb", "day_24.adb", "day_25.adb"
+     );
 
    package Compiler is
       for Default_Switches ("Ada") use
