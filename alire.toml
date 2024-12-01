@@ -9,3 +9,8 @@ maintainers-logins = ["reznikmm"]
 project-files = ["gnat/advent_of_ada.gpr"]
 
 executables = ["advent_of_ada"]
+
+[build-switches]
+development.optimization = ["-O0"]
+"*".ada_version = "Ada83"
+"*".debug_info = "Yes"
