@@ -1,7 +1,7 @@
 with "../config/advent_of_ada_config.gpr";
 project Advent_Of_Ada is
 
-   for Source_Dirs use ("../source/day_12", "../config/");
+   for Source_Dirs use ("../source/day_13", "../config/");
    for Object_Dir use "../.objs/" & Advent_Of_Ada_Config.Build_Profile;
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "../bin";
