@@ -1,0 +1,27 @@
+--  SPDX-FileCopyrightText: 2025 Max Reznik <reznikmm@gmail.com>
+--
+--  SPDX-License-Identifier: Apache-2.0
+----------------------------------------------------------------
+
+with "../config/aoc_config.gpr";
+project Aoc is
+
+   for Source_Dirs use ("../source/**", "../config/");
+   for Object_Dir use "../obj/" & Aoc_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "../bin";
+   for Main use ("aoc-day_01.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use Aoc_Config.Ada_Compiler_Switches;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); --  Symbolic traceback
+   end Binder;
+
+   package Install is
+      for Artifacts (".") use ("share");
+   end Install;
+
+end Aoc;
