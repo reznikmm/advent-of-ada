@@ -10,7 +10,9 @@ project Aoc is
    for Object_Dir use "../obj/" & Aoc_Config.Build_Profile;
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "../bin";
-   for Main use ("aoc-day_01.adb");
+   for Main use
+     ("aoc-day_02.adb",
+      "aoc-day_01.adb");
 
    package Compiler is
       for Default_Switches ("Ada") use Aoc_Config.Ada_Compiler_Switches;
