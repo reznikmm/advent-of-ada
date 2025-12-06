@@ -11,7 +11,8 @@ project Aoc is
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "../bin";
    for Main use
-     ("aoc-day_05.adb",
+     ("aoc-day_06.adb",
+      "aoc-day_05.adb",
       "aoc-day_04.adb",
       "aoc-day_03.adb",
       "aoc-day_02.adb",

@@ -13,17 +13,55 @@ with Ada.Strings.Fixed;
 procedure AOC.Day_05 is
 
    type Ingredient_Id is new Long_Long_Integer;
-   package Ingredient_Id_IO is new Ada.Text_IO.Integer_IO (Ingredient_Id);
+   --  package Ingredient_Id_IO is new Ada.Text_IO.Integer_IO (Ingredient_Id);
 
    type Span is record
       First, Last : Ingredient_Id;
    end record;
 
+   --  function Is_Empty (Value : Span) return Boolean is
+   --    (Value.Last < Value.First);
+
+   function Is_Overlap (Left, Right : Span) return Boolean is
+      (Left.First in Right.First .. Right.Last or
+         Right.First in Left.First .. Left.Last);
+
+   function "or" (Left, Right : Span) return Span is
+     (Ingredient_Id'Min (Left.First, Right.First),
+      Ingredient_Id'Max (Left.Last, Right.Last))
+        with Pre => Is_Overlap (Left, Right);
+
    package Span_Lists is new Ada.Containers.Doubly_Linked_Lists (Span);
+
+   procedure Append (List : in out Span_Lists.List; Item : Span);
+
+   procedure Append (List : in out Span_Lists.List; Item : Span) is
+      Next   : Span_Lists.List;
+      Result : Span_Lists.List := List;
+      Again  : Boolean := True;
+      Value  : Span := Item;
+   begin
+      while Again loop
+         Again := False;
+
+         for Item of Result loop
+            if Is_Overlap (Item, Value) then
+               Value := @ or Item;
+            else
+               Next.Append (Item);
+            end if;
+         end loop;
+
+         Result.Move (Source => Next);
+      end loop;
+
+      List.Move (Source => Result);
+      List.Append (Value);
+   end Append;
 
    Valid_Ids : Span_Lists.List;
 
-   Total : Natural := 0;
+   Total : Long_Long_Integer := 0;
 begin
    declare
       Space : constant Ada.Strings.Maps.Character_Set :=
@@ -49,26 +87,15 @@ begin
                Dash := Ada.Strings.Fixed.Index (Line (From .. To), "-");
                Next.First := Ingredient_Id'Value (Line (From .. Dash - 1));
                Next.Last := Ingredient_Id'Value (Line (Dash + 1 .. To));
-               Valid_Ids.Append (Next);
+               Append (Valid_Ids, Next);
                From := To + 1;
             end loop;
          end;
       end loop;
    end;
 
-   while not Ada.Text_IO.End_Of_File loop
-      declare
-         procedure Skip_New_Line (Text : String) is null;
-
-         Id : Ingredient_Id;
-      begin
-         Ingredient_Id_IO.Get (Id);
-         Skip_New_Line (Ada.Text_IO.Get_Line);
-
-         if (for some Span of Valid_Ids => Id in Span.First .. Span.Last) then
-            Total := @ + 1;
-         end if;
-      end;
+   for Item of Valid_Ids loop
+      Total := @ + Long_Long_Integer (Item.Last - Item.First + 1);
    end loop;
 
    Ada.Text_IO.Put_Line (Total'Image);
